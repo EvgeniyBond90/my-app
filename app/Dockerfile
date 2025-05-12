@@ -1,11 +1,18 @@
-FROM python:3.9-slim
+# Stage 1: Build
+FROM python:3.9-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Stage 2: Final image
+FROM python:3.9-slim
 WORKDIR /app
 
-COPY requirements.txt .
-#RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --cache-dir ./app/.cache -r requirements.txt
+# Копируем установленные зависимости из первой стадии
+COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+
+# Копируем исходный код приложения
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+# Убедитесь, что uvicorn доступен в PATH
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
