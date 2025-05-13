@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Buttons</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js "></script>
+    <style>
+        .button-container {
+            margin-bottom: 10px;
+        }
+        button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Buttons Example</h1>
+
+    <!-- Форма для добавления нового элемента -->
+    <form id="addItemForm">
+        <input type="text" id="itemName" placeholder="Name" required>
+        <input type="text" id="itemDescription" placeholder="Description">
+        <button type="submit">Add Item</button>
+    </form>
+
+    <!-- Контейнер для кнопок -->
+    <div id="buttonContainer" class="button-container"></div>
+
+    <script>
+        const apiUrl = "http://localhost:31156"; // Убедитесь, что это URL вашего FastAPI-сервера
+
+        // Функция для загрузки элементов
+        async function loadItems() {
+            try {
+                const response = await axios.get(`${apiUrl}/items/`);
+                const items = response.data;
+
+                // Очистить контейнер кнопок
+                const container = document.getElementById("buttonContainer");
+                container.innerHTML = "";
+
+                // Создать кнопки для каждого элемента
+                items.forEach(item => {
+                    const button = document.createElement("button");
+                    button.innerText = item.name;
+                    button.onclick = () => deleteItem(item.id);
+                    container.appendChild(button);
+                });
+            } catch (error) {
+                console.error("Error loading items:", error);
+            }
+        }
+
+        // Функция для добавления нового элемента
+        document.getElementById("addItemForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = document.getElementById("itemName").value;
+            const description = document.getElementById("itemDescription").value;
+
+            try {
+                await axios.post(`${apiUrl}/items/`, { name, description });
+                alert("Item added!");
+                loadItems(); // Обновить список кнопок
+            } catch (error) {
+                console.error("Error adding item:", error);
+            }
+        });
+
+        // Функция для удаления элемента
+        async function deleteItem(itemId) {
+            try {
+                await axios.delete(`${apiUrl}/items/${itemId}`);
+                alert(`Item ${itemId} deleted!`);
+                loadItems(); // Обновить список кнопок
+            } catch (error) {
+                console.error("Error deleting item:", error);
+            }
+        }
+
+        // Загрузить элементы при загрузке страницы
+        loadItems();
+    </script>
+</body>
+</html>

@@ -1,10 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Request
 from pydantic import BaseModel
 import psycopg2
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 # Создаем экземпляр FastAPI
 app = FastAPI()
+
+
+# Подключение шаблонов
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
 
 # Настройка CORS
 app.add_middleware(
@@ -54,3 +65,14 @@ def read_items():
     cur.close()
     conn.close()
     return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
+
+
+@app.delete("/items/{item_id}")
+def delete_item(item_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM items WHERE id = %s", (item_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"message": f"Item {item_id} deleted"}
