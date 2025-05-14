@@ -54,7 +54,7 @@ def read_items():
         print(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Database connection failed")
 
-# Создание нового элемента
+## Создание нового элемента
 @app.post("/items/")
 def create_item(item: Item):
     try:
@@ -69,7 +69,7 @@ def create_item(item: Item):
         print(f"Database error: {e}")
         raise HTTPException(status_code=500, detail="Failed to create item")
 
-# Удаление элемента
+##Удаление элемента
 @app.delete("/items/{item_id}")
 def delete_item(item_id: int):
     try:
