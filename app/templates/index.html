@@ -28,7 +28,7 @@
     <div id="buttonContainer" class="button-container"></div>
 
     <script>
-        const apiUrl = "http://localhost:31156"; // Убедитесь, что это URL вашего FastAPI-сервера
+        const apiUrl = "http://192.168.0.65:30439/"; // Убедитесь, что это URL вашего FastAPI-сервера
 
         // Функция для загрузки элементов
         async function loadItems() {
@@ -43,9 +43,9 @@
                 // Создать кнопки для каждого элемента
                 items.forEach(item => {
                     const button = document.createElement("button");
-                    button.innerText = item.name;
-                    button.onclick = () => deleteItem(item.id);
-                    container.appendChild(button);
+                    button.innerText = item.name; // Имя элемента на кнопке
+                    button.onclick = () => deleteItem(item.id); // Обработчик клика
+                    container.appendChild(button); // Добавление кнопки в контейнер
                 });
             } catch (error) {
                 console.error("Error loading items:", error);
