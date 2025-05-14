@@ -4,7 +4,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Final image
+# Stage 2: Final image here
 FROM python:3.9-slim
 WORKDIR /app
 
