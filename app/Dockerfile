@@ -1,18 +1,85 @@
-# Stage 1: Build
-FROM python:3.9-slim AS builder
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel
+import psycopg2
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-# Stage 2: Final image
-FROM python:3.9-slim
-WORKDIR /app
+# Создаем экземпляр FastAPI
+app = FastAPI()
 
-# Копируем установленные зависимости из первой стадии
-COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+# Подключение шаблонов
+templates = Jinja2Templates(directory="templates")
 
-# Копируем исходный код приложения
-COPY . .
+# Настройка CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://192.168.0.65:30439/"],  # Разрешить все источники
+    allow_credentials=True,
+    allow_methods=["http://192.168.0.65:30439/"],  # Разрешить все HTTP-методы
+    allow_headers=["http://192.168.0.65:30439/"],  # Разрешить все заголовки
+)
 
-# Убедитесь, что uvicorn доступен в PATH
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Модель данных
+class Item(BaseModel):
+    name: str
+    description: str = None
+
+# Подключение к PostgreSQL
+def get_db_connection():
+    return psycopg2.connect(
+        dbname="mydb",
+        user="bond",
+        password="123",
+        host="postgres"
+    )
+
+# Корневой маршрут
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+# Получение всех элементов
+@app.get("/items/")
+def read_items():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM items")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [{"id": row[0], "name": row[1], "description": row[2]} for row in rows]
+    except Exception as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Database connection failed")
+
+# Создание нового элемента
+@app.post("/items/")
+def create_item(item: Item):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO items (name, description) VALUES (%s, %s)", (item.name, item.description))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"message": "Item created"}
+    except Exception as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create item")
+
+# Удаление элемента
+@app.delete("/items/{item_id}")
+def delete_item(item_id: int):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM items WHERE id = %s", (item_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {"message": f"Item {item_id} deleted"}
+    except Exception as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete item")
