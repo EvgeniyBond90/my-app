@@ -14,10 +14,10 @@ templates = Jinja2Templates(directory="templates")
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://192.168.0.65:30439/"],  # Разрешить все источники
+    allow_origins=["http://192.168.0.65:30439"],  # Разрешить все источники
     allow_credentials=True,
-    allow_methods=["http://192.168.0.65:30439/"],  # Разрешить все HTTP-методы
-    allow_headers=["http://192.168.0.65:30439/"],  # Разрешить все заголовки
+    allow_methods=["http://192.168.0.65:30439"],  # Разрешить все HTTP-методы
+    allow_headers=["http://192.168.0.65:30439"],  # Разрешить все заголовки
 )
 
 # Модель данных
