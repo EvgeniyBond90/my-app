@@ -41,8 +41,8 @@ class Item(BaseModel):
 def get_db_connection():
     return psycopg2.connect(
         dbname="mydb",
-        user="myuser",
-        password="mypassword",
+        user="bond",
+        password="123",
         host="postgres"
     )
 
