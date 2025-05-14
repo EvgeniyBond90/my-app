@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["http://192.168.0.65:30439"],  # Разрешить все заголовки
 )
 
-# Модель данных
+# Модель данных#
 class Item(BaseModel):
     name: str
     description: str = None
