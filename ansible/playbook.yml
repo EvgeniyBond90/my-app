@@ -1,0 +1,40 @@
+---
+- name: Deploy application to Kubernetes
+  hosts: local
+  become: no  # Если не нужны права root
+  vars:
+    docker_image: "my-back:latest"  # Укажите переменную для образа
+  tasks:
+    - name: Update Kubernetes Deployment with new image
+      k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-app
+            namespace: default
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: my-app
+            template:
+              metadata:
+                labels:
+                  app: my-app
+              spec:
+                containers:
+                  - name: my-app
+                    image: "{{ docker_image }}"
+                    ports:
+                      - containerPort: 8000
+
+    - name: Rollout deployment
+      shell: kubectl rollout status deployment/my-app -n default
+      register: rollout_status
+      failed_when: "'not found' in rollout_status.stderr or 'error' in rollout_status.stderr"
+
+    - name: Debug rollout status
+      debug:
+        msg: "{{ rollout_status.stdout }}"
