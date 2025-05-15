@@ -26,7 +26,7 @@
               spec:
                 containers:
                   - name: my-app
-                    image: "{{ docker_image }}"
+                    image: "efilimonov/back:latest"
                     ports:
                       - containerPort: 8000
 
