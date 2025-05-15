@@ -4,7 +4,7 @@
   connection: local
   become: no
   vars:
-    docker_image: "efilimonov/back:latest"  # Можно передать извне через параметры запуска
+    docker_image: "{{ docker_image }}"  # Можно передать извне через параметры запуска
 
   tasks:
     - name: Update Kubernetes Deployment with new image
