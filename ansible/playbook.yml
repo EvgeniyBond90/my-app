@@ -3,7 +3,7 @@
   hosts: local
   become: no  # Если не нужны права root
   vars:
-    docker_image: "my-back:latest"  # Укажите переменную для образа
+    docker_image: "efilimonov/back:latest"  # Укажите переменную для образа
   tasks:
     - name: Update Kubernetes Deployment with new image
       k8s:
