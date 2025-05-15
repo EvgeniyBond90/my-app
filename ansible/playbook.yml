@@ -3,7 +3,7 @@
   hosts: local
   become: no
   vars:
-    docker_image: "{{ docker_image }}"
+    docker_image: "{{ docker_image }}"  # Убедитесь, что переменная передается извне или определена внутри playbook
   tasks:
     - name: Update Kubernetes Deployment with new image
       k8s:
@@ -31,13 +31,14 @@
                       - containerPort: 8000
 
     - name: Wait for deployment to complete
-      community.kubernetes.k8s_rollout:
-        api_version: apps/v1
-        kind: Deployment
-        name: my-app
-        namespace: default
-        wait: yes
-        timeout: 300
+      shell: kubectl rollout status deployment/my-app -n default
+      register: rollout_status
+      failed_when: >
+        "'not found' in rollout_status.stderr or 'error' in rollout_status.stderr"
+
+    - name: Debug rollout status
+      debug:
+        msg: "{{ rollout_status.stdout }}"
 
     - name: Debug deployment status
       debug:
