@@ -4,7 +4,7 @@
   connection: local
   become: no
   vars:
-    docker_image: "{{ docker_image }}"  # Можно передать извне через параметры запуска
+    docker_image: "{{ docker_image:latest }}"  # Можно передать извне через параметры запуска
 
   tasks:
     - name: Update Kubernetes Deployment with new image
@@ -28,7 +28,7 @@
               spec:
                 containers:
                   - name: my-app
-                    image: "{{ docker_image }}"  # Используем переменную
+                    image: "{{ docker_image:latest }}"  # Используем переменную
                     ports:
                       - containerPort: 8000
 
