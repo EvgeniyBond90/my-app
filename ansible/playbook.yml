@@ -3,7 +3,7 @@
   hosts: local
   become: no  # Если не нужны права root
   vars:
-    docker_image: "efilimonov/back:latest"  # Укажите переменную для образа
+    docker_image: "{{ docker_image }}"  # Переменная передается из Jenkins
   tasks:
     - name: Update Kubernetes Deployment with new image
       k8s:
@@ -26,15 +26,19 @@
               spec:
                 containers:
                   - name: my-app
-                    image: "efilimonov/back:latest"
+                    image: "{{ docker_image }}"
                     ports:
                       - containerPort: 8000
 
-    - name: Rollout deployment
-      shell: kubectl rollout status deployment/my-app -n default
-      register: rollout_status
-      failed_when: "'not found' in rollout_status.stderr or 'error' in rollout_status.stderr"
+    - name: Wait for deployment to complete
+      k8s_rollout:
+        api_version: apps/v1
+        kind: Deployment
+        name: my-app
+        namespace: default
+        wait: yes
+        timeout: 300
 
-    - name: Debug rollout status
+    - name: Debug deployment status
       debug:
-        msg: "{{ rollout_status.stdout }}"
+        msg: "Deployment updated successfully with image: {{ docker_image }}"
