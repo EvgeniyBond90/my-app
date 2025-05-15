@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI()
 
 # Подключение шаблонов
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 # Настройка CORS
 app.add_middleware(
