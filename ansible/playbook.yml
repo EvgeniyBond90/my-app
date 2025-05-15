@@ -33,13 +33,11 @@
     - name: Wait for deployment to complete
       shell: kubectl rollout status deployment/my-app -n default
       register: rollout_status
-      failed_when: >
-        "'not found' in rollout_status.stderr or 'error' in rollout_status.stderr"
-
+      failed_when: 
+        - rollout_status.rc != 0
+        - "'not found' in rollout_status.stderr"
+        - "'error' in rollout_status.stderr
+    
     - name: Debug rollout status
       debug:
         msg: "{{ rollout_status.stdout }}"
-
-    - name: Debug deployment status
-      debug:
-        msg: "Deployment updated successfully with image: efilimonov/back:latest"
