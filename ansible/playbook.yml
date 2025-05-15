@@ -1,9 +1,9 @@
 ---
 - name: Deploy application to Kubernetes
   hosts: local
-  become: no  # Если не нужны права root
+  become: no
   vars:
-    docker_image: "{{ docker_image }}"  # Переменная передается из Jenkins
+    docker_image: "{{ docker_image }}"
   tasks:
     - name: Update Kubernetes Deployment with new image
       k8s:
@@ -31,7 +31,7 @@
                       - containerPort: 8000
 
     - name: Wait for deployment to complete
-      k8s_rollout:
+      community.kubernetes.k8s_rollout:
         api_version: apps/v1
         kind: Deployment
         name: my-app
