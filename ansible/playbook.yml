@@ -1,9 +1,11 @@
 ---
 - name: Deploy application to Kubernetes
-  hosts: local
+  hosts: localhost
+  connection: local
   become: no
   vars:
-    docker_image: "efilimonov/back:latest"  # Убедитесь, что переменная передается извне или определена внутри playbook
+    docker_image: "efilimonov/back:latest"  # Можно передать извне через параметры запуска
+
   tasks:
     - name: Update Kubernetes Deployment with new image
       k8s:
@@ -26,18 +28,17 @@
               spec:
                 containers:
                   - name: my-app
-                    image: "efilimonov/back:latest"
+                    image: "{{ docker_image }}"  # Используем переменную
                     ports:
                       - containerPort: 8000
 
     - name: Wait for deployment to complete
-      shell: kubectl rollout status deployment/my-app -n default
+      shell: kubectl rollout status deployment/my-app -n default --timeout=60s
       register: rollout_status
-      failed_when: 
+      failed_when:
         - rollout_status.rc != 0
-        - "'not found' in rollout_status.stderr"
-        - "'error' in rollout_status.stderr
-    
+        - "'not found' in rollout_status.stderr or 'error' in rollout_status.stderr"
+
     - name: Debug rollout status
       debug:
         msg: "{{ rollout_status.stdout }}"
